@@ -1,0 +1,466 @@
+<div class="root">
+    <div fxFlex="95" class="base">
+        <div fxLayout="row wrap" fxLayoutAlign="space-between" style="align-items: stretch;" class="top">
+            <div fxFlex="75" fxFlex.lt-md="100" fxFlex.lt-sm="100" fxLayout="column" fxLayoutAlign="start center">
+                <div class="item">
+                    <form (keydown.enter)="$event.preventDefault()" [formGroup]="headerFormGroup">
+                        <div fxLayout="row wrap" fxLayoutGap="1px" fxLayoutAlign="start center">
+                            <mat-form-field fxFlex="16" fxFlex.lt-md="30" appearance="outline" fxFlex.lt-sm="100">
+                                <mat-label>نوع حواله</mat-label>
+                                <mat-select (keydown.enter)="wh.open()" (selectionChange)="wh.open();wh.focus()"
+                                    formControlName="categoryId" dvcTabIndex="1">
+                                    <mat-option *ngFor="let item of WhConfigList.transactionCategories"
+                                        [value]="item.id">
+                                        {{item.title}}</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+
+
+                            <span *ngIf="headerFormGroup.controls['statusId'].value==3" class="chp-warn">
+                                <mat-icon svgIcon="close"></mat-icon>
+                                <div>وضعیت : <span>{{'حذف شده'}}</span></div>
+                            </span>
+
+                            <!-- <mat-form-field fxFlex="12" fxFlex.lt-md="30" appearance="outline" fxFlex.lt-sm="100">
+                                <mat-label>مالیات به درصد</mat-label>
+                                <input matInput formControlName="taxPercent" type="number" dvcTabIndex="37"
+                                    placeholder="مالیات را وارد کنید">
+                                <mat-icon matSuffix color="primary" svgIcon="percent-outline"></mat-icon>
+                            </mat-form-field>
+                            <mat-form-field fxFlex="11" fxFlex.lt-md="30" appearance="outline" fxFlex.lt-sm="100">
+                                <mat-label>مالیات</mat-label>
+                                <input matInput formControlName="taxPrice" type="number" dvcTabIndex="38"
+                                    placeholder="مالیات را وارد کنید">
+                                <mat-icon matSuffix color="primary" svgIcon="currency-rial"></mat-icon>
+                            </mat-form-field> -->
+                            <mat-form-field fxFlex="16" fxFlex.lt-md="30" appearance="outline" fxFlex.lt-sm="100">
+                                <mat-label>توضیحات </mat-label>
+                                <input matInput formControlName="description" dvcTabIndex="40"
+                                    placeholder="توضیحات را وارد کنید">
+                            </mat-form-field>
+
+                            <ng-container *ngIf="isOutMode; else elseTemplate">
+                                <mat-form-field fxFlex="12" fxFlex.lt-md="30" appearance="outline" fxFlex.lt-sm="100">
+                                    <mat-label>تحویل گیرنده</mat-label>
+                                    <input matInput formControlName="receiverInfo" dvcTabIndex="45"
+                                        placeholder="تحویل گیرنده را وارد کنید">
+                                    <mat-icon *ngIf="isWhToWh && !headerFormGroup.controls['receiverUserId'].value"
+                                        (click)="openUserListDialog()" matSuffix color="primary"
+                                        svgIcon="Employees-Management"> </mat-icon>
+                                    <mat-icon *ngIf="headerFormGroup.controls['receiverUserId'].value" matSuffix
+                                        (click)="headerFormGroup.controls['receiverUserId'].setValue(null);headerFormGroup.controls['receiverInfo'].setValue(null); headerFormGroup.controls['receiverInfo'].enable()"
+                                        color="warn" svgIcon="close">
+                                    </mat-icon>
+                                </mat-form-field>
+                            </ng-container>
+                            <ng-template #elseTemplate>
+                                <mat-form-field fxFlex="12" fxFlex.lt-md="30" appearance="outline" fxFlex.lt-sm="100">
+                                    <mat-label>موزع</mat-label>
+                                    <input matInput formControlName="distributorInfo" dvcTabIndex="45"
+                                        placeholder="موزع را وارد کنید">
+                                </mat-form-field>
+                            </ng-template>
+
+                            <ng-container *ngIf="isWhToWh; else elseTemplate2">
+                                <mat-form-field fxFlex="14" fxFlex.lt-md="30" appearance="outline" fxFlex.lt-sm="100">
+                                    <mat-label>انبار یا قفسه مقصد</mat-label>
+                                    <mat-select formControlName="destinationStoreId" (focus)="Company.open()" #Company
+                                        dvcTabIndex="51">
+                                        <mat-option (click)="distributorInfo.focus();Company.close()"
+                                            *ngFor="let item of storeList" [value]="item.id">
+                                            {{item.title}}</mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </ng-container>
+                            <ng-template #elseTemplate2>
+                                <mat-form-field fxFlex="14" fxFlex.lt-md="30" appearance="outline" fxFlex.lt-sm="100">
+                                    <mat-label>شرکت پخش</mat-label>
+                                    <mat-select formControlName="distributorCompanyId" (focus)="Company.open();"
+                                        #Company dvcTabIndex="51">
+                                        <mat-option (click)="distributorInfo.focus();Company.close()" [value]="null">
+                                        </mat-option>
+                                        <mat-option *ngFor="let item of companyList"
+                                            (click)="distributorInfo.focus();Company.close()" [value]="item.id">
+                                            {{item.title}}</mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </ng-template>
+
+
+                            <mat-form-field [ngClass]="{'is-out-mode': !isOutMode}" fxFlex="16" fxFlex.lt-md="30"
+                                appearance="outline" fxFlex.lt-sm="100">
+                                <mat-label>تحویل دهنده </mat-label>
+                                <input matInput formControlName="distributorInfo" dvcTabIndex="55" #distributorInfo
+                                    placeholder="تحویل دهنده را وارد کنید">
+                                <mat-icon *ngIf="!headerFormGroup.controls['distributorUserId'].value"
+                                    (click)="openDistributorUserListDialog()" matSuffix color="primary"
+                                    svgIcon="Employees-Management">
+                                </mat-icon>
+                                <mat-icon *ngIf="headerFormGroup.controls['distributorUserId'].value" matSuffix
+                                    (click)="headerFormGroup.controls['distributorUserId'].setValue(null);headerFormGroup.controls['distributorInfo'].setValue(null);headerFormGroup.controls['distributorInfo'].enable()"
+                                    color="warn" svgIcon="close">
+                                </mat-icon>
+                            </mat-form-field>
+
+
+
+                        </div>
+                    </form>
+                </div>
+                <div class="item add-drug">
+                    <form (keydown.enter)="$event.preventDefault()" [formGroup]="detailsFormGroup">
+                        <div fxLayout="row wrap" fxLayoutAlign="start center">
+                            <button mat-raised-button fxFlex="10" fxFlex.lt-md="20" fxFlex.lt-sm="100"
+                                class="chp-accent attach-toggle" [ngClass]="{ 'chp-warn': isCosmetic }"
+                                matTooltipPosition="below" matTooltip="نحوه جستجو در محصولات"
+                                (click)="isCosmetic = !isCosmetic">
+                                <mat-icon [svgIcon]="isCosmetic ? 'arch' : 'draw-pen'"></mat-icon>
+                                <mat-label>{{ isCosmetic ? "بهداشتی" : "دارو" }}</mat-label>
+                            </button>
+                            <mat-form-field fxFlex="60" fxFlex.lt-md="70" fxFlex.lt-md="100" appearance="outline">
+                                <mat-label>{{ isCosmetic ? "نام محصول" : "نام دارو" }}</mat-label>
+                                <input #trigger="matAutocompleteTrigger" #addDrugInput type="text" matInput
+                                    dvcTabIndex="60" [matAutocomplete]="autoDrug" formControlName="drugId"
+                                    [placeholder]="isCosmetic? 
+                                                'نام محصول را وارد کنید' : 'نام یا قیمت فروش یا نام شرکت تولید کننده را وارد کنید'" />
+                                <mat-autocomplete #autoDrug="matAutocomplete"
+                                    [autoActiveFirstOption]="__drugsList&&__drugsList!.length>0"
+                                    (optionActivated)="drugSearchOptionActivated($event)"
+                                    (optionSelected)="openStoreDrugDialog()" [displayWith]="getDrugName">
+                                    <mat-option *ngFor="let drg of __drugsList" [value]="drg">
+                                        <span *ngIf="drg.isEmpty">موردی یافت نشد</span>
+                                        <div class="opt-search" *ngIf="!drg.isEmpty" style="width:100%;" fxLayout="row"
+                                            fxLayoutAlign="space-between center">
+                                            <div class="fx-row-ce-ce" fxLayoutGap="5px"
+                                                style="line-height: 1.2rem;width:100%;">
+                                                <span class="chp-primary">{{ drg.genericCode }}</span>
+                                                <span *ngIf="drg.title">{{ drg.title }}</span>
+                                                <span *ngIf="drg.enTitle">{{ drg.enTitle }}</span>
+                                                <span *ngIf="drg.dosageEn">{{ drg.dosageEn }}</span>
+                                                <span *ngIf="drg.factory" class="chp-info">{{
+                                                    drg.factory
+                                                    }}</span>
+                                                <span *ngIf="drg.inLocalDb" class="chp-accent"
+                                                    style="margin-right: auto;">{{ drg.price | number }}
+                                                    ریال</span>
+                                                <div *ngIf="drg.whStoreDrug.length != 0" class="warehouse-wrapper"
+                                                    fxLayout="column" fxLayoutAlign="center end">
+                                                    <div>موجودی<span class="chp-accent">{{drg.whStoreDrug[0].balance -
+                                                            drg.whStoreDrug[0].freezeBalance }}</span></div>
+                                                    <div>قفل<span class="chp-warn"
+                                                            matTooltip="تعدادی از این دارو در نسخ پیشنویس رزرو شده است">{{drg.whStoreDrug[0].freezeBalance}}</span>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                            <mat-icon *ngIf="!drg.inLocalDb" color="primary"
+                                                matTooltip="این دارو به پایگاه داده داخلی داروخانه اضافه خواهد شد."
+                                                svgIcon="cloud-download-outline"></mat-icon>
+                                        </div>
+                                    </mat-option>
+                                    <mat-option [value]="'  __HQ__  '+detailsFormGroup.controls['drugId'].value"
+                                        (click)="$event.stopPropagation(); trigger.openPanel();"
+                                        *ngIf="_canSearchFromHq && !isOutMode" style="text-align: center;">
+                                        <div class="fx-row-ce-ce">
+                                            <span class="chp-primary" style="line-height: initial;">جستجو از سرور هوشمند
+                                                دواچی</span>
+                                        </div>
+                                    </mat-option>
+                                    <mat-progress-bar *ngIf="_searchFormHqIsInProgress" mode="query"></mat-progress-bar>
+                                </mat-autocomplete>
+                            </mat-form-field>
+                            <span>تعداد</span>
+
+
+                            <mat-form-field appearance="outline" fxFlex="10" fxFlex.lt-md="30" fxFlex.lt-sm="100">
+                                <mat-label>تعداد جز</mat-label>
+                                <input autocompleteOff dvcTabIndex="75" type="number" formControlName="portionCount"
+                                    (keydown.enter)="calculateDrugPayable()" matInput autocomplete="off"
+                                    placeholder="تعداد جز را وارد کنید" />
+                            </mat-form-field>
+                            <mat-form-field *ngIf="isOutMode" class="mat-form-field-readonly" appearance="outline"
+                                fxFlex="10" fxFlex.lt-md="30" fxFlex.lt-sm="100">
+                                <mat-label>تعداد کل</mat-label>
+                                <input autocompleteOff #calculatedAmount [readonly]="true" type="number"
+                                    formControlName="calculatedAmount" matInput autocomplete="off" />
+                            </mat-form-field>
+                            <mat-form-field appearance="outline" fxFlex="16" fxFlex.lt-md="30" fxFlex.lt-sm="100">
+                                <mat-label>قیمت خرید</mat-label>
+                                <input autocompleteOff type="text" dvcTabIndex="80" formControlName="buyPrice"
+                                    (keydown.enter)="calculateDrugPayable()"
+                                    [value]="detailsFormGroup.controls['buyPrice'].value? (detailsFormGroup.controls['buyPrice'].value | numberPipe) :'' "
+                                    (keypress)="numericOnly($event)" matInput autocomplete="off"
+                                    placeholder="قیمت خرید را وارد کنید" />
+                                <mat-icon matSuffix color="primary" svgIcon="currency-rial"></mat-icon>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" fxFlex="12" fxFlex.lt-md="30" fxFlex.lt-sm="100">
+                                <mat-label>تخفیف به درصد</mat-label>
+                                <input autocompleteOff type="number" dvcTabIndex="90"
+                                    (keydown.enter)="calculateDrugPayable()" formControlName="discountPercent" matInput
+                                    autocomplete="off" placeholder="نخفیف را وارد کنید" />
+                                <mat-icon matSuffix color="primary" svgIcon="percent-outline"></mat-icon>
+                            </mat-form-field>
+                            <mat-form-field appearance="outline" fxFlex="16" fxFlex.lt-md="30" fxFlex.lt-sm="100"
+                                [ngClass]="{'mat-form-field-readonly': detailsFormGroup.controls['discountPercent'].value !=0 && detailsFormGroup.controls['discountPercent'].value}">
+                                <mat-label>تخفیف</mat-label>
+                                <input autocompleteOff type="text" dvcTabIndex="91"
+                                    [readOnly]="+detailsFormGroup.controls['discountPercent'].value !=0"
+                                    (keydown.enter)=" calculateDrugPayable()" formControlName="discountPrice" matInput
+                                    autocomplete="off"
+                                    [value]="detailsFormGroup.controls['discountPrice'].value? (detailsFormGroup.controls['discountPrice'].value | numberPipe) :'' "
+                                    (keypress)="numericOnly($event)" placeholder="نخفیف را وارد کنید" />
+                                <mat-icon matSuffix color="primary" svgIcon="currency-rial"></mat-icon>
+                                <mat-hint
+                                    *ngIf="detailsFormGroup.controls['discountPercent'].value !=0 && detailsFormGroup.controls['discountPercent'].value">این
+                                    فیلد قابل تغییر نیست
+                                </mat-hint>
+                            </mat-form-field>
+                            <mat-form-field appearance="outline" fxFlex="12" fxFlex.lt-md="30" fxFlex.lt-sm="100">
+                                <mat-label>مالیات به درصد</mat-label>
+                                <input autocompleteOff type="number" dvcTabIndex="92" formControlName="taxPercent"
+                                    (keydown.enter)="calculateDrugPayable()" matInput autocomplete="off"
+                                    placeholder="مالیات را وارد کنید" />
+                                <mat-icon matSuffix color="primary" svgIcon="percent-outline"></mat-icon>
+                            </mat-form-field>
+                            <mat-form-field appearance="outline"
+                                [ngClass]="{'mat-form-field-readonly': detailsFormGroup.controls['taxPercent'].value !=0 && detailsFormGroup.controls['taxPercent'].value}"
+                                class="" fxFlex="16" fxFlex.lt-md="30" fxFlex.lt-sm="100">
+                                <mat-label>مالیات</mat-label>
+                                <input autocompleteOff [readOnly]="+detailsFormGroup.controls['taxPercent'].value !=0"
+                                    type="text" dvcTabIndex="93" formControlName="taxPrice"
+                                    (keydown.enter)="isOutMode ? settlementDeadLineDays.focus():'' ;calculateDrugPayable()"
+                                    matInput autocomplete="off"
+                                    [value]="detailsFormGroup.controls['taxPrice'].value? (detailsFormGroup.controls['taxPrice'].value | numberPipe) :'' "
+                                    (keypress)="numericOnly($event)" placeholder="مالیات را وارد کنید" />
+                                <mat-icon matSuffix color="primary" svgIcon="currency-rial"></mat-icon>
+                                <mat-hint
+                                    *ngIf="detailsFormGroup.controls['taxPercent'].value !=0 && detailsFormGroup.controls['taxPercent'].value">این
+                                    فیلد قابل تغییر نیست
+                                </mat-hint>
+                            </mat-form-field>
+                            <mat-form-field appearance="outline" fxFlex=" 10" fxFlex.lt-md="30" fxFlex.lt-sm="100">
+                                <mat-label>تاریخ انقضا</mat-label>
+                                <input autocompleteOff [textMask]="{mask: maskDatePickers.mask}" #insuranceExpire
+                                    dvcTabIndex="100" matInput (ngModelChange)="checkDateValidation($event)"
+                                    formControlName="expireDate" placeholder="تاریخ انقضا" />
+                                <mat-hint *ngIf="detailsFormGroup.controls['expireDate']?.value">
+                                    {{(detailsFormGroup.controls['expireDate'].value| jalali) ?
+                                    (detailsFormGroup.controls['expireDate'].value| jalali)
+                                    :detailsFormGroup.controls['expireDate'].value }}</mat-hint>
+                            </mat-form-field>
+                            <mat-form-field appearance="outline" fxFlex="10" fxFlex.lt-md="30" fxFlex.lt-sm="100">
+                                <mat-label>شماره بچ</mat-label>
+                                <input autocompleteOff type="text" dvcTabIndex="105" formControlName="batchId" matInput
+                                    autocomplete="off" placeholder="شماره بچ را وارد کنید" />
+                            </mat-form-field>
+                            <mat-form-field appearance="outline" fxFlex="10" fxFlex.lt-md="30" fxFlex.lt-sm="100">
+                                <mat-label>مهلت تسویه (روز)</mat-label>
+                                <input autocompleteOff type="number" dvcTabIndex="110"
+                                    formControlName="settlementDeadLineDays" #settlementDeadLineDays matInput
+                                    autocomplete="off" placeholder="مبلغ تسویه را وارد کنید" />
+                            </mat-form-field>
+                            <span *ngIf="!isOutMode">محل قرار گیری</span>
+                            <mat-form-field *ngIf="!isOutMode" appearance="outline" fxFlex="10" fxFlex.lt-md="30"
+                                fxFlex.lt-sm="100">
+                                <mat-label>ردیف</mat-label>
+                                <input autocompleteOff type="number" dvcTabIndex="115" formControlName="row" matInput
+                                    autocomplete="off" placeholder="ردیف را وارد کنید" />
+                            </mat-form-field>
+                            <mat-form-field *ngIf="!isOutMode" appearance="outline" fxFlex="10" fxFlex.lt-md="30"
+                                fxFlex.lt-sm="100">
+                                <mat-label>قفسه</mat-label>
+                                <input autocompleteOff type="number" dvcTabIndex="120" formControlName="shelf" matInput
+                                    autocomplete="off" placeholder="قفسه را وارد کنید" />
+                            </mat-form-field>
+                            <mat-form-field *ngIf="!isOutMode" appearance="outline" fxFlex="10" fxFlex.lt-md="30"
+                                fxFlex.lt-sm="100">
+                                <mat-label>طبقه</mat-label>
+                                <input autocompleteOff type="number" dvcTabIndex="125" formControlName="floor" matInput
+                                    autocomplete="off" placeholder="طبقه را وارد کنید" />
+                            </mat-form-field>
+                            <mat-form-field appearance="outline" fxFlex="16" fxFlex.lt-md="30" fxFlex.lt-sm="100">
+                                <mat-label>قابل پرداخت</mat-label>
+                                <input autocompleteOff type="text" dvcTabIndex="130" formControlName="payable"
+                                    (keypress)="numericOnly($event)"
+                                    [value]="detailsFormGroup.controls['payable'].value ? (detailsFormGroup.controls['payable'].value.toString() | numberPipe) :'' "
+                                    matInput autocomplete="off" placeholder="قابل پرداخت را وارد کنید" />
+                                <mat-icon matSuffix color="primary" svgIcon="currency-rial"></mat-icon>
+                            </mat-form-field>
+                            <mat-form-field appearance="outline" fxFlex="16" fxFlex.lt-md="30" fxFlex.lt-sm="100">
+                                <mat-label>توضیحات</mat-label>
+                                <input autocompleteOff type="text" dvcTabIndex="133" (keydown.enter)="isGift.focus()"
+                                    formControlName="description" matInput autocomplete="off"
+                                    placeholder="توضیحات را وارد کنید" />
+                            </mat-form-field>
+                            <mat-checkbox formControlName="isGift" #isGift dvcTabIndex="134">هدیه</mat-checkbox>
+                            <button mat-raised-button color="primary" [disabled]="isLoading"
+                                (keydown.enter)="addDrugToTransaction()" (click)="addDrugToTransaction()"
+                                dvcTabIndex="136">تایید
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="item-financial" style="min-height: 100%;" fxFlex="24" fxFlex.lt-md="100" fxFlex.lt-sm="100">
+                <app-wh-financial [isOutMode]="isOutMode" [whFinancial]="transactionHeaderDetails"></app-wh-financial>
+                <div fxLayout="row wrap" fxLayoutAlign="space-between center" class="buttons">
+
+                    <button fxFlex="49" fxFlex.lt-md="20" mat-raised-button (click)="checkCreateMode(1)"
+                        color="primary">ثبت پیشنویس</button>
+                    <button fxFlex="49" fxFlex.lt-md="20" mat-raised-button (click)="checkCreateMode(2)"
+                        color="primary">ثبت</button>
+                    <button fxFlex="100" fxFlex.lt-md="19" mat-raised-button color="warn"
+                        (click)="clearTransaction()">انصراف</button>
+
+                    <span class="chp-warn errors"
+                        *ngIf="detailsFormGroup.controls['calculatedAmount'].invalid && isOutMode"> مقدار
+                        وارد شده
+                        بیشتر از حد مجاز
+                        می باشد</span>
+                </div>
+            </div>
+        </div>
+        <div class="bottom item">
+            <table class="dvc-table">
+                <thead>
+                    <tr>
+                        <th align="center">ردیف</th>
+                        <th align="center">نام دارو</th>
+                        <th align="center">
+                            <div fxLayout="column">
+                                <span>تعداد</span>
+                                <span class="chp-info table-quantity"> بسته * در بسته + جز</span>
+                            </div>
+                        </th>
+                        <th align="center">قیمت خرید</th>
+                        <th align="center"> جمع قیمت خرید</th>
+                        <th align="center">قیمت فروش</th>
+                        <th align="center"> جمع قیمت فروش</th>
+                        <th align="center">تخفیف</th>
+                        <th align="center">مالبات</th>
+                        <th align="center" *ngIf="!isOutMode">سود</th>
+                        <th align="center">شماره بچ</th>
+                        <th align="center">تاریخ انقضا</th>
+                        <th align="center">مهلت تسویه</th>
+                        <th align="center">
+                            <div fxLayout="column">
+                                <span>محل قرار گیری</span>
+                                <span class="chp-info table-quantity"> طبقه , قفسه , ردیف</span>
+                            </div>
+                        </th>
+                        <th align="center">قابل پرداخت</th>
+                        <th align="center">توضیحات</th>
+                        <th align="end">عملیات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr [ngClass]="{'not-valid' : drg.isValidItem == false}"
+                        *ngFor="let drg of transactionHeaderDetails.items; let i = index">
+                        <td class="ellipsis" align="center" data-title="ردیف">
+                            <div fxLayout="column">
+                                <span class="chp-info row-index">
+                                    <mat-label>{{ i+1 }}</mat-label>
+                                </span>
+                                <span class="chp-info table-quantity">
+                                    {{drg.updateStatus ==1 ? 'جدید' :
+                                    (drg.updateStatus ==2 ? 'بروزرسانی' :
+                                    (drg.updateStatus ==3 ? 'حذف شده' : 'ثبت شده')) }}
+                                </span>
+                            </div>
+                        </td>
+                        <td class="ellipsis" align="center" data-title="نام دارو">
+                            <span class="chp-info" *ngIf="drg.drug?.genericCode">{{drg.drug.genericCode}}</span>
+                            {{drg.drug.title}}
+                        </td>
+                        <td class="ellipsis" align="center" data-title="تعداد">
+                            <div fxLayout="column">
+                                <span>{{drg.calculatedAmount }}</span>
+                                <span class="chp-info table-quantity">
+                                    {{drg.portionCount + ' + ( '+ drg.perBoxCount + ' * ' + drg.boxCount + ')'}}
+                                </span>
+                            </div>
+                        </td>
+                        <td class="ellipsis" align="center" data-title="قیمت خرید">
+                            {{drg.buyPrice |number}}
+                        </td>
+                        <td class="ellipsis" align="center" data-title="جمع قیمت خرید">
+                            {{(drg.calculatedAmount *drg.buyPrice)|number}}
+                        </td>
+                        <td class="ellipsis" align="center" data-title="قیمت فروش">
+                            {{drg.sellPrice |number}}
+                        </td>
+                        <td class="ellipsis" align="center" data-title="جمع قیمت فروش">
+                            {{(drg.calculatedAmount *drg.sellPrice)|number}}
+                        </td>
+                        <td class="ellipsis" align="center" data-title="تخفیف">
+                            {{drg.discountPrice |number}}
+                        </td>
+                        <td class="ellipsis" align="center" data-title="مالبات">
+                            {{drg.taxPrice |number}}
+                        </td>
+                        <td class="ellipsis" *ngIf="!isOutMode" align="center" data-title="سود">
+                            <div fxLayout="column">
+                                <span dir="ltr" class="chp-primary">
+                                    {{ (drg.calculatedAmount * drg.sellPrice ) -
+                                    (drg.calculatedAmount * drg.buyPrice - drg.discountPrice +drg.taxPrice)|number}}
+                                </span>
+                                <span dir="ltr" class="chp-primary" *ngIf=" (drg.calculatedAmount * drg.sellPrice ) -
+                                    (drg.calculatedAmount * drg.buyPrice - drg.discountPrice +drg.taxPrice) !=0">
+                                    {{(( drg.calculatedAmount * drg.sellPrice -
+                                    drg.calculatedAmount * drg.buyPrice -
+                                    drg.discountPrice +drg.taxPrice) *100 ) /
+                                    ( drg.calculatedAmount * drg.buyPrice ) |number}}
+                                </span>
+                            </div>
+
+                        </td>
+                        <td class="ellipsis" align="center" data-title="شماره بچ">
+                            {{drg.batchId}}
+                        </td>
+                        <td class="ellipsis" align="center" data-title="تاریخ انقضا">
+                            {{drg.expireDate ? ( '(' +(drg.expireDate| jalali )+
+                            ') ' + (drg.expireDate| date : 'yyyy/MM/dd' ) ): ''
+                            }}
+                        </td>
+                        <td class="ellipsis" align="center" data-title="مهلت تسویه">
+                            {{drg.settlementDeadLineDays}}
+                        </td>
+                        <td class="ellipsis" align="center" data-title="محل قرار گیری">
+                            <div fxLayout="column">
+                                <span class="chp-info table-quantity">{{drg.address}}</span>
+
+                            </div>
+                        </td>
+                        <td class="ellipsis" align="center" data-title="قابل پرداخت">
+                            {{drg.payable |number}}
+                        </td>
+                        <td class="ellipsis" align="center" data-title="توضیحات">
+                            {{drg.description}}
+                        </td>
+                        <td align="end" data-title="عملیات">
+                            <button *ngIf="!drg.isDrugEditMode" mat-icon-button [matMenuTriggerFor]="menu"
+                                color="primary">
+                                <mat-icon svgIcon="menu"></mat-icon>
+                            </button>
+                            <mat-menu xPosition="before" yPosition="below" style="background-color: red;"
+                                #menu="matMenu">
+                                <button (click)="updateTable(drg)" mat-menu-item>
+                                    <span>بروزرسانی</span>
+                                </button>
+                                <button (click)="checkDrugQuantity(drg,3)" mat-menu-item>
+                                    <span>حذف</span>
+                                </button>
+                            </mat-menu>
+                            <button mat-icon-button color="warn" *ngIf="drg.isDrugEditMode"
+                                (click)="cancelUpdateMode(drg)">
+                                <mat-icon svgIcon="close"></mat-icon>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <ng-lottie [options]="lottieOpt"></ng-lottie>
+        </div>
+    </div>
+</div>
